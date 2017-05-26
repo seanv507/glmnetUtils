@@ -75,12 +75,13 @@ makeModelComponents <- function(formula, data, weights=NULL, offset=NULL, subset
         # this avoids possible stack overflow with large no. of terms
         rhs <- parse(text=paste("~", paste(tickQuote(rhsVars), collapse="+")))[[1]][[2]]
     }
+    rhsTerms <- strsplit(deparse(rhs),' + ', fixed=T)[[1]]
     rhsVars <- all.vars(rhs)
     rhsNames <- all.names(rhs)
-
+    
     # only formulas of the form x1 + x2 + ... allowed, no expressions or interactions
-    if(!setequal(c("+", rhsVars), c("+", rhsNames)))
-        stop("only additive formulas allowed")
+    #if(!setequal(c("+", rhsVars), c("+", rhsNames)))
+    #    stop("only additive formulas allowed")
 
     if(!missing(subset))
     {
@@ -110,7 +111,7 @@ makeModelComponents <- function(formula, data, weights=NULL, offset=NULL, subset
     }
     weightVals <- data$weightVals
 
-    matrs <- sapply(rhsVars, function(x) {
+    matrs <- sapply(rhsTerms, function(x) {
         out <- if(sparse)
             Matrix::sparse.model.matrix(formula(paste("~ 0 +", x)), data,
                 drop.unused.levels=drop.unused.levels, xlev=xlev)
@@ -130,7 +131,7 @@ makeModelComponents <- function(formula, data, weights=NULL, offset=NULL, subset
     }, simplify=FALSE)
 
     # cut-down version of real terms object: an (unevaluated) call object containing a formula
-    terms <- parse(text=paste("~", paste(tickQuote(rhsVars), collapse="+")))[[1]]
+    terms <- parse(text=paste("~", paste(tickQuote(rhsTerms), collapse="+")))[[1]]
     environment(terms) <- NULL  # ensure we don't save tons of crap by accident
 
     xlev <- lapply(matrs, function(m) attr(m, "xlev"))

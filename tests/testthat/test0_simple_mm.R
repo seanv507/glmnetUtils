@@ -24,6 +24,31 @@ test_that("standard and simple model frame agree", {
     expect_equivalent(xy0$y, xy1$y)
 })
 
+test_that("standard and simple model frame agree with numeric interactions", {
+  frm <- 'mpg ~ am + gear + am:gear'
+  xy0 <- std_mf(as.formula(frm), data=mtcars)
+  xy1 <- simple_mf(as.formula(frm), data=mtcars)
+  
+  expect_equivalent(xy0$x, xy1$x)
+  expect_equivalent(xy0$y, xy1$y)
+})
+
+# looks similar ... simple_mf uses dummy variables
+# test_that("standard and simple model frame agree with factor interactions", {
+#   dat <-  mtcars
+#   dat$am_f <- factor(dat$am)
+#   dat$gear_f <- factor(dat$gear)
+#   frm <- 'mpg ~ am_f + gear + am_f:gear_f'
+#   
+#   xy0 <- std_mf(as.formula(frm), data=dat)
+#   xy1 <- simple_mf(as.formula(frm), data=dat)
+#   
+#   expect_equivalent(xy0$x, xy1$x)
+#   expect_equivalent(xy0$y, xy1$y)
+# })
+
+
+
 
 test_that("optional arguments work", {
     xy1.0 <- std_mf(mpg ~ ., data=mtcars, weights=wt, offset=drat, sparse=TRUE)
